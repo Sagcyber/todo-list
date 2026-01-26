@@ -1,9 +1,11 @@
 package com.todo.todolist.service.impl;
 
+import com.todo.todolist.dto.request.TaskUpdateRequest;
 import com.todo.todolist.entity.Category;
 import com.todo.todolist.entity.Task;
 import com.todo.todolist.entity.User;
 import com.todo.todolist.exception.EntityNotFoundException;
+import com.todo.todolist.mapper.TaskMapper;
 import com.todo.todolist.repository.CategoryRepository;
 import com.todo.todolist.repository.TaskRepository;
 import com.todo.todolist.repository.UserRepository;
@@ -20,6 +22,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final TaskMapper taskMapper;
     
     @Override
     public Task create(Task task, Long userId, Long categoryId) {
@@ -57,13 +60,10 @@ public class TaskServiceImpl implements TaskService {
     }
     
     @Override
-    public Task update(Long id, Task updatedTask) {
+    public Task update(Long id, TaskUpdateRequest updateRequest) {
         Task existingTask = getById(id);
         
-        existingTask.setTitle(updatedTask.getTitle());
-        existingTask.setDescription(updatedTask.getDescription());
-        existingTask.setCompleted(updatedTask.isCompleted());
-        existingTask.setDueDate(updatedTask.getDueDate());
+        taskMapper.updateEntity(existingTask, updateRequest);
         
         return taskRepository.save(existingTask);
     }
