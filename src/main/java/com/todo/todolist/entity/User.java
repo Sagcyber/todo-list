@@ -2,7 +2,6 @@ package com.todo.todolist.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.scheduling.config.Task;
 
 import java.time.LocalDateTime;
 import java.util.List;
