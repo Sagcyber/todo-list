@@ -1,6 +1,10 @@
 package com.todo.todolist.controller;
 
+import com.todo.todolist.dto.request.TaskCreateRequest;
+import com.todo.todolist.dto.request.TaskUpdateRequest;
+import com.todo.todolist.dto.response.TaskResponse;
 import com.todo.todolist.entity.Task;
+import com.todo.todolist.mapper.TaskMapper;
 import com.todo.todolist.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,38 +18,48 @@ import java.util.List;
 public class TaskController {
     
     private final TaskService taskService;
+    private final TaskMapper taskMapper;
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Task create(
-            @RequestBody Task task,
+    public TaskResponse create(
+            @RequestBody TaskCreateRequest request,
             @RequestParam Long userId,
             @RequestParam(required = false) Long categoryId
     ) {
-        return taskService.create(task, userId, categoryId);
+        Task task = taskMapper.toEntity(request);
+        Task created = taskService.create(task, userId, categoryId);
+        return taskMapper.toResponse(created);
     }
     
     @GetMapping("/{id}")
-    public Task getById(@PathVariable Long id) {
-        return taskService.getById(id);
+    public TaskResponse getById(@PathVariable Long id) {
+        return taskMapper.toResponse(taskService.getById(id));
     }
     
     @GetMapping
-    public List<Task> getAll() {
-        return taskService.getAll();
+    public List<TaskResponse> getAll() {
+        return taskService.getAll()
+                          .stream()
+                          .map(taskMapper::toResponse)
+                          .toList();
     }
     
     @GetMapping("/by-category/{categoryId}")
-    public List<Task> getByCategory(@PathVariable Long categoryId) {
-        return taskService.getByCategory(categoryId);
+    public List<TaskResponse> getByCategory(@PathVariable Long categoryId) {
+        return taskService.getByCategory(categoryId)
+                          .stream()
+                          .map(taskMapper::toResponse)
+                          .toList();
     }
     
     @PutMapping("/{id}")
-    public Task update(
+    public TaskResponse update(
             @PathVariable Long id,
-            @RequestBody Task task
+            @RequestBody TaskUpdateRequest request
     ) {
-        return taskService.update(id, task);
+        Task updated = taskService.update(id, request);
+        return taskMapper.toResponse(updated);
     }
     
     @DeleteMapping("/{id}")
