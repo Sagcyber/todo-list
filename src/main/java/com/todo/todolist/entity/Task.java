@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class Task {
     
     @Id
@@ -23,6 +24,10 @@ public class Task {
     
     @Column(length = 1000)
     private String description;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 50)
+    private TaskType type;
     
     @Column(nullable = false)
     private boolean completed;
@@ -44,5 +49,9 @@ public class Task {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         completed = false;
+        
+        if (type == null) {
+            type = TaskType.OTHER;
+        }
     }
 }

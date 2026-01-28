@@ -3,6 +3,7 @@ package com.todo.todolist.service.impl;
 import com.todo.todolist.dto.request.TaskUpdateRequest;
 import com.todo.todolist.entity.Category;
 import com.todo.todolist.entity.Task;
+import com.todo.todolist.entity.TaskType;
 import com.todo.todolist.entity.User;
 import com.todo.todolist.exception.EntityNotFoundException;
 import com.todo.todolist.mapper.TaskMapper;
@@ -29,46 +30,49 @@ public class TaskServiceImpl implements TaskService {
     private final TaskMapper taskMapper;
     
     @Override
+    @CacheEvict(
+            value = {"tasks", "tasksByCategory"},
+            allEntries = true
+    )
     public Task create(Task task, Long userId, Long categoryId) {
         
         User user = userRepository.findById(userId)
-                                  .orElseThrow(() -> {
-                                      log.warn("User not found while creating task: userId={}", userId);
-                                      return new EntityNotFoundException("User not found with id: " + userId);
-                                  });
+                                  .orElseThrow(() ->
+                                                       new EntityNotFoundException("User not found with id: " + userId)
+                                  );
         
         task.setUser(user);
         
         if (categoryId != null) {
             Category category = categoryRepository.findById(categoryId)
-                                                  .orElseThrow(() -> {
-                                                      log.warn("Category not found while creating task: categoryId={}", categoryId);
-                                                      return new EntityNotFoundException("Category not found with id: " + categoryId);
-                                                  });
+                                                  .orElseThrow(() ->
+                                                                       new EntityNotFoundException("Category not found with id: " + categoryId)
+                                                  );
             task.setCategory(category);
         }
         
         Task savedTask = taskRepository.save(task);
         
         log.info(
-                "Task created: id={}, title='{}', userId={}, categoryId={}",
+                "Task created: id={}, title='{}'",
                 savedTask.getId(),
-                savedTask.getTitle(),
-                userId,
-                categoryId
+                savedTask.getTitle()
         );
         
         return savedTask;
     }
     
     @Override
-    @Cacheable(value = "tasks", key = "#id")
+    @Cacheable(
+            value = "tasks",
+            key = "#id",
+            condition = "@environment.getProperty('app.cache.enabled') == 'true'"
+    )
     public Task getById(Long id) {
         return taskRepository.findById(id)
-                             .orElseThrow(() -> {
-                                 log.warn("Task not found: id={}", id);
-                                 return new EntityNotFoundException("Task not found with id: " + id);
-                             });
+                             .orElseThrow(() ->
+                                                  new EntityNotFoundException("Task not found with id: " + id)
+                             );
     }
     
     @Override
@@ -77,23 +81,34 @@ public class TaskServiceImpl implements TaskService {
     }
     
     @Override
-    @Cacheable(value = "tasksByCategory", key = "#categoryId")
+    @Cacheable(
+            value = "tasksByCategory",
+            key = "#categoryId",
+            condition = "@environment.getProperty('app.cache.enabled') == 'true'"
+    )
     public List<Task> getByCategory(Long categoryId) {
         return taskRepository.findByCategoryId(categoryId);
     }
     
     @Override
-    @CacheEvict(value = "tasks", key = "#id")
+    public List<Task> getByType(TaskType type) {
+        return taskRepository.findByType(type);
+    }
+    
+    @Override
+    @CacheEvict(
+            value = {"tasks", "tasksByCategory"},
+            allEntries = true
+    )
     public Task update(Long id, TaskUpdateRequest updateRequest) {
         
         Task existingTask = getById(id);
-        
         taskMapper.updateEntity(existingTask, updateRequest);
         
         Task updatedTask = taskRepository.save(existingTask);
         
         log.info(
-                "Task updated: id={}, newTitle='{}'",
+                "Task updated: id={}, title='{}'",
                 updatedTask.getId(),
                 updatedTask.getTitle()
         );
@@ -102,7 +117,10 @@ public class TaskServiceImpl implements TaskService {
     }
     
     @Override
-    @CacheEvict(value = "tasks", key = "#id")
+    @CacheEvict(
+            value = {"tasks", "tasksByCategory"},
+            allEntries = true
+    )
     public void delete(Long id) {
         
         Task task = getById(id);

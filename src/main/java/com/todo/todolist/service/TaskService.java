@@ -2,6 +2,7 @@ package com.todo.todolist.service;
 
 import com.todo.todolist.dto.request.TaskUpdateRequest;
 import com.todo.todolist.entity.Task;
+import com.todo.todolist.entity.TaskType;
 
 import java.util.List;
 
@@ -14,6 +15,8 @@ public interface TaskService {
     List<Task> getAll();
     
     List<Task> getByCategory(Long categoryId);
+    
+    List<Task> getByType(TaskType type);
     
     Task update(Long id, TaskUpdateRequest updateRequest);
     

@@ -3,6 +3,7 @@ package com.todo.todolist.controller;
 import com.todo.todolist.dto.request.TaskCreateRequest;
 import com.todo.todolist.dto.request.TaskUpdateRequest;
 import com.todo.todolist.dto.response.TaskResponse;
+import com.todo.todolist.entity.TaskType;
 import com.todo.todolist.mapper.TaskMapper;
 import com.todo.todolist.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,14 @@ public class TaskController {
     @GetMapping("/by-category/{categoryId}")
     public List<TaskResponse> getByCategory(@PathVariable Long categoryId) {
         return taskService.getByCategory(categoryId)
+                          .stream()
+                          .map(taskMapper::toResponse)
+                          .toList();
+    }
+    
+    @GetMapping("/by-type/{type}")
+    public List<TaskResponse> getByType(@PathVariable TaskType type) {
+        return taskService.getByType(type)
                           .stream()
                           .map(taskMapper::toResponse)
                           .toList();

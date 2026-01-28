@@ -10,6 +10,6 @@ import java.time.LocalDate;
 public class TaskUpdateRequest {
     private String title;
     private String description;
-    private boolean completed;
+    private Boolean completed;
     private LocalDate dueDate;
 }

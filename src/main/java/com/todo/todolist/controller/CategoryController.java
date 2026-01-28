@@ -1,5 +1,6 @@
 package com.todo.todolist.controller;
 
+import com.todo.todolist.dto.request.CategoryCreateRequest;
 import com.todo.todolist.dto.response.CategoryResponse;
 import com.todo.todolist.entity.Category;
 import com.todo.todolist.mapper.CategoryMapper;
@@ -20,8 +21,14 @@ public class CategoryController {
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponse create(@RequestBody Category category) {
-        return categoryMapper.toResponse(categoryService.create(category));
+    public CategoryResponse create(@RequestBody CategoryCreateRequest request) {
+        return categoryMapper.toResponse(
+                categoryService.create(
+                        Category.builder()
+                                .name(request.name())
+                                .build()
+                )
+        );
     }
     
     @GetMapping("/{id}")
@@ -40,9 +47,14 @@ public class CategoryController {
     @PutMapping("/{id}")
     public CategoryResponse update(
             @PathVariable Long id,
-            @RequestBody Category category
+            @RequestBody CategoryCreateRequest request
     ) {
-        return categoryMapper.toResponse(categoryService.update(id, category));
+        return categoryMapper.toResponse(
+                categoryService.update(
+                        id,
+                        Category.builder().name(request.name()).build()
+                )
+        );
     }
     
     @DeleteMapping("/{id}")

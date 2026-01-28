@@ -18,18 +18,27 @@ public class TaskMapper {
                         ? request.getDueDate().atStartOfDay()
                         : null
         );
+        task.setType(request.getType()); // ← ВАЖНО
         return task;
     }
     
     public void updateEntity(Task task, TaskUpdateRequest request) {
-        task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
-        task.setCompleted(request.isCompleted());
-        task.setDueDate(
-                request.getDueDate() != null
-                        ? request.getDueDate().atStartOfDay()
-                        : null
-        );
+        
+        if (request.getTitle() != null) {
+            task.setTitle(request.getTitle());
+        }
+        
+        if (request.getDescription() != null) {
+            task.setDescription(request.getDescription());
+        }
+        
+        if (request.getCompleted() != null) {
+            task.setCompleted(request.getCompleted());
+        }
+        
+        if (request.getDueDate() != null) {
+            task.setDueDate(request.getDueDate().atStartOfDay());
+        }
     }
     
     public TaskResponse toResponse(Task task) {
