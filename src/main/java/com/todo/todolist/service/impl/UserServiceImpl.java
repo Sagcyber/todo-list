@@ -5,6 +5,8 @@ import com.todo.todolist.exception.EntityNotFoundException;
 import com.todo.todolist.repository.UserRepository;
 import com.todo.todolist.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
     
+    @Cacheable(value = "users", key = "#id")
     @Override
     public User getById(Long id) {
         return userRepository.findById(id)
@@ -32,6 +35,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
     
+    @CacheEvict(value = "users", key = "#id")
     @Override
     public User update(Long id, User updatedUser) {
         User existingUser = getById(id);
@@ -42,6 +46,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(existingUser);
     }
     
+    @CacheEvict(value = "users", key = "#id")
     @Override
     public void delete(Long id) {
         User user = getById(id);

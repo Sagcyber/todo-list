@@ -11,6 +11,8 @@ import com.todo.todolist.repository.TaskRepository;
 import com.todo.todolist.repository.UserRepository;
 import com.todo.todolist.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +44,7 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.save(task);
     }
     
+    @Cacheable(value = "tasks", key = "#id")
     @Override
     public Task getById(Long id) {
         return taskRepository.findById(id)
@@ -54,11 +57,13 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.findAll();
     }
     
+    @Cacheable(value = "tasksByCategory", key = "#categoryId")
     @Override
     public List<Task> getByCategory(Long categoryId) {
         return taskRepository.findByCategoryId(categoryId);
     }
     
+    @CacheEvict(value = "tasks", key = "#id")
     @Override
     public Task update(Long id, TaskUpdateRequest updateRequest) {
         Task existingTask = getById(id);
@@ -68,6 +73,7 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.save(existingTask);
     }
     
+    @CacheEvict(value = "tasks", key = "#id")
     @Override
     public void delete(Long id) {
         Task task = getById(id);
