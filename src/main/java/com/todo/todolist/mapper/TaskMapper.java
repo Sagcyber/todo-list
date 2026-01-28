@@ -6,30 +6,28 @@ import com.todo.todolist.dto.response.TaskResponse;
 import com.todo.todolist.entity.Task;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 public class TaskMapper {
     
-    public Task toEntity(TaskCreateRequest dto) {
+    public Task toEntity(TaskCreateRequest request) {
         Task task = new Task();
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
         task.setDueDate(
-                dto.getDueDate() != null
-                        ? dto.getDueDate().atStartOfDay()
+                request.getDueDate() != null
+                        ? request.getDueDate().atStartOfDay()
                         : null
         );
         return task;
     }
     
-    public void updateEntity(Task task, TaskUpdateRequest dto) {
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        task.setCompleted(dto.isCompleted());
+    public void updateEntity(Task task, TaskUpdateRequest request) {
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setCompleted(request.isCompleted());
         task.setDueDate(
-                dto.getDueDate() != null
-                        ? dto.getDueDate().atStartOfDay()
+                request.getDueDate() != null
+                        ? request.getDueDate().atStartOfDay()
                         : null
         );
     }

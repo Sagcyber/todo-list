@@ -1,6 +1,9 @@
 package com.todo.todolist.controller;
 
-import com.todo.todolist.entity.User;
+import com.todo.todolist.dto.request.UserCreateRequest;
+import com.todo.todolist.dto.request.UserUpdateRequest;
+import com.todo.todolist.dto.response.UserResponse;
+import com.todo.todolist.mapper.UserMapper;
 import com.todo.todolist.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,29 +17,37 @@ import java.util.List;
 public class UserController {
     
     private final UserService userService;
+    private final UserMapper userMapper;
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
-        return userService.create(user);
+    public UserResponse create(@RequestBody UserCreateRequest request) {
+        return userMapper.toResponse(
+                userService.create(userMapper.toEntity(request))
+        );
     }
     
     @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return userService.getById(id);
+    public UserResponse getById(@PathVariable Long id) {
+        return userMapper.toResponse(userService.getById(id));
     }
     
     @GetMapping
-    public List<User> getAll() {
-        return userService.getAll();
+    public List<UserResponse> getAll() {
+        return userService.getAll()
+                          .stream()
+                          .map(userMapper::toResponse)
+                          .toList();
     }
     
     @PutMapping("/{id}")
-    public User update(
+    public UserResponse update(
             @PathVariable Long id,
-            @RequestBody User user
+            @RequestBody UserUpdateRequest request
     ) {
-        return userService.update(id, user);
+        return userMapper.toResponse(
+                userService.update(id, request)
+        );
     }
     
     @DeleteMapping("/{id}")

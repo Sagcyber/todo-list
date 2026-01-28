@@ -1,5 +1,6 @@
 package com.todo.todolist.service;
 
+import com.todo.todolist.dto.request.UserUpdateRequest;
 import com.todo.todolist.entity.User;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public interface UserService {
     
     List<User> getAll();
     
-    User update(Long id, User updatedUser);
+    User update(Long id, UserUpdateRequest request);
     
     void delete(Long id);
 }

@@ -1,7 +1,9 @@
 package com.todo.todolist.service.impl;
 
+import com.todo.todolist.dto.request.UserUpdateRequest;
 import com.todo.todolist.entity.User;
 import com.todo.todolist.exception.EntityNotFoundException;
+import com.todo.todolist.mapper.UserMapper;
 import com.todo.todolist.repository.UserRepository;
 import com.todo.todolist.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     
     @Override
     public User create(User user) {
@@ -32,8 +35,8 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
     
-    @Cacheable(value = "users", key = "#id")
     @Override
+    @Cacheable(value = "users", key = "#id")
     public User getById(Long id) {
         return userRepository.findById(id)
                              .orElseThrow(() -> {
@@ -47,14 +50,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
     
-    @CacheEvict(value = "users", key = "#id")
     @Override
-    public User update(Long id, User updatedUser) {
+    @CacheEvict(value = "users", key = "#id")
+    public User update(Long id, UserUpdateRequest request) {
         
         User existingUser = getById(id);
-        
-        existingUser.setUsername(updatedUser.getUsername());
-        existingUser.setEmail(updatedUser.getEmail());
+        userMapper.updateEntity(existingUser, request);
         
         User savedUser = userRepository.save(existingUser);
         
@@ -67,10 +68,9 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
     
-    @CacheEvict(value = "users", key = "#id")
     @Override
+    @CacheEvict(value = "users", key = "#id")
     public void delete(Long id) {
-        
         User user = getById(id);
         userRepository.delete(user);
         

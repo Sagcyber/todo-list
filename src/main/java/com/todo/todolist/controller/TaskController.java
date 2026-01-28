@@ -3,7 +3,6 @@ package com.todo.todolist.controller;
 import com.todo.todolist.dto.request.TaskCreateRequest;
 import com.todo.todolist.dto.request.TaskUpdateRequest;
 import com.todo.todolist.dto.response.TaskResponse;
-import com.todo.todolist.entity.Task;
 import com.todo.todolist.mapper.TaskMapper;
 import com.todo.todolist.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +26,13 @@ public class TaskController {
             @RequestParam Long userId,
             @RequestParam(required = false) Long categoryId
     ) {
-        Task task = taskMapper.toEntity(request);
-        Task created = taskService.create(task, userId, categoryId);
-        return taskMapper.toResponse(created);
+        return taskMapper.toResponse(
+                taskService.create(
+                        taskMapper.toEntity(request),
+                        userId,
+                        categoryId
+                )
+        );
     }
     
     @GetMapping("/{id}")
@@ -58,8 +61,7 @@ public class TaskController {
             @PathVariable Long id,
             @RequestBody TaskUpdateRequest request
     ) {
-        Task updated = taskService.update(id, request);
-        return taskMapper.toResponse(updated);
+        return taskMapper.toResponse(taskService.update(id, request));
     }
     
     @DeleteMapping("/{id}")

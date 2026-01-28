@@ -61,8 +61,8 @@ public class TaskServiceImpl implements TaskService {
         return savedTask;
     }
     
-    @Cacheable(value = "tasks", key = "#id")
     @Override
+    @Cacheable(value = "tasks", key = "#id")
     public Task getById(Long id) {
         return taskRepository.findById(id)
                              .orElseThrow(() -> {
@@ -76,14 +76,14 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.findAll();
     }
     
-    @Cacheable(value = "tasksByCategory", key = "#categoryId")
     @Override
+    @Cacheable(value = "tasksByCategory", key = "#categoryId")
     public List<Task> getByCategory(Long categoryId) {
         return taskRepository.findByCategoryId(categoryId);
     }
     
-    @CacheEvict(value = "tasks", key = "#id")
     @Override
+    @CacheEvict(value = "tasks", key = "#id")
     public Task update(Long id, TaskUpdateRequest updateRequest) {
         
         Task existingTask = getById(id);
@@ -101,8 +101,8 @@ public class TaskServiceImpl implements TaskService {
         return updatedTask;
     }
     
-    @CacheEvict(value = "tasks", key = "#id")
     @Override
+    @CacheEvict(value = "tasks", key = "#id")
     public void delete(Long id) {
         
         Task task = getById(id);

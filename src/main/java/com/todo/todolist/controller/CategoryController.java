@@ -1,6 +1,8 @@
 package com.todo.todolist.controller;
 
+import com.todo.todolist.dto.response.CategoryResponse;
 import com.todo.todolist.entity.Category;
+import com.todo.todolist.mapper.CategoryMapper;
 import com.todo.todolist.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,29 +16,33 @@ import java.util.List;
 public class CategoryController {
     
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Category create(@RequestBody Category category) {
-        return categoryService.create(category);
+    public CategoryResponse create(@RequestBody Category category) {
+        return categoryMapper.toResponse(categoryService.create(category));
     }
     
     @GetMapping("/{id}")
-    public Category getById(@PathVariable Long id) {
-        return categoryService.getById(id);
+    public CategoryResponse getById(@PathVariable Long id) {
+        return categoryMapper.toResponse(categoryService.getById(id));
     }
     
     @GetMapping
-    public List<Category> getAll() {
-        return categoryService.getAll();
+    public List<CategoryResponse> getAll() {
+        return categoryService.getAll()
+                              .stream()
+                              .map(categoryMapper::toResponse)
+                              .toList();
     }
     
     @PutMapping("/{id}")
-    public Category update(
+    public CategoryResponse update(
             @PathVariable Long id,
             @RequestBody Category category
     ) {
-        return categoryService.update(id, category);
+        return categoryMapper.toResponse(categoryService.update(id, category));
     }
     
     @DeleteMapping("/{id}")
