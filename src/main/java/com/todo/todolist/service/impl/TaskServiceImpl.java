@@ -11,6 +11,7 @@ import com.todo.todolist.repository.TaskRepository;
 import com.todo.todolist.repository.UserRepository;
 import com.todo.todolist.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TaskServiceImpl implements TaskService {
     
     private final TaskRepository taskRepository;
@@ -28,28 +30,45 @@ public class TaskServiceImpl implements TaskService {
     
     @Override
     public Task create(Task task, Long userId, Long categoryId) {
+        
         User user = userRepository.findById(userId)
-                                  .orElseThrow(() ->
-                                                       new EntityNotFoundException("User not found with id: " + userId));
+                                  .orElseThrow(() -> {
+                                      log.warn("User not found while creating task: userId={}", userId);
+                                      return new EntityNotFoundException("User not found with id: " + userId);
+                                  });
         
         task.setUser(user);
         
         if (categoryId != null) {
             Category category = categoryRepository.findById(categoryId)
-                                                  .orElseThrow(() ->
-                                                                       new EntityNotFoundException("Category not found with id: " + categoryId));
+                                                  .orElseThrow(() -> {
+                                                      log.warn("Category not found while creating task: categoryId={}", categoryId);
+                                                      return new EntityNotFoundException("Category not found with id: " + categoryId);
+                                                  });
             task.setCategory(category);
         }
         
-        return taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+        
+        log.info(
+                "Task created: id={}, title='{}', userId={}, categoryId={}",
+                savedTask.getId(),
+                savedTask.getTitle(),
+                userId,
+                categoryId
+        );
+        
+        return savedTask;
     }
     
     @Cacheable(value = "tasks", key = "#id")
     @Override
     public Task getById(Long id) {
         return taskRepository.findById(id)
-                             .orElseThrow(() ->
-                                                  new EntityNotFoundException("Task not found with id: " + id));
+                             .orElseThrow(() -> {
+                                 log.warn("Task not found: id={}", id);
+                                 return new EntityNotFoundException("Task not found with id: " + id);
+                             });
     }
     
     @Override
@@ -66,17 +85,29 @@ public class TaskServiceImpl implements TaskService {
     @CacheEvict(value = "tasks", key = "#id")
     @Override
     public Task update(Long id, TaskUpdateRequest updateRequest) {
+        
         Task existingTask = getById(id);
         
         taskMapper.updateEntity(existingTask, updateRequest);
         
-        return taskRepository.save(existingTask);
+        Task updatedTask = taskRepository.save(existingTask);
+        
+        log.info(
+                "Task updated: id={}, newTitle='{}'",
+                updatedTask.getId(),
+                updatedTask.getTitle()
+        );
+        
+        return updatedTask;
     }
     
     @CacheEvict(value = "tasks", key = "#id")
     @Override
     public void delete(Long id) {
+        
         Task task = getById(id);
         taskRepository.delete(task);
+        
+        log.info("Task deleted: id={}", id);
     }
 }
